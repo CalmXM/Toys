@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bilibili</title>
+</head>
+<style>
+    h1 {
+        text-align: center;
+    }
+</style>
+
+<body>
+    <h1>bilibili用户信息查询</h1>
+    <form action="https://api.bilibili.com/x/space/acc/info" method="">
+
+        <table align="center">
+            <tr>
+                <td>UID:</td>
+                <td>
+                    <input type="text" name="mid" id="uid" onkeydown="keyup_submit(event);">
+                </td>
+                <td>
+                    <button type="button" onclick="query()">start</button>
+                </td>
+            </tr>
+
+            <tr>
+                <td>userName:</td>
+                <td>
+                    <input type="text" class="reset" id="name" readonly>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Sex:</td>
+                <td>
+                    <input type="text" class="reset" id="sex" readonly>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Birthday:</td>
+                <td>
+                    <input type="text" class="reset" id="birthday" readonly>
+                </td>
+            </tr>
+
+            <tr>
+                <td>School:</td>
+                <td>
+                    <input type="text" class="reset" id="school" readonly>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Following:</td>
+                <td>
+                    <input type="text" class="reset" id="following" readonly>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Follower:</td>
+                <td>
+                    <input type="text" class="reset" id="follower" readonly>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Face:</td>
+                <td>
+                    <img src="" alt="" id="face">
+                </td>
+            </tr>
+        </table>
+    </form>
+
+</body>
+
+
+<script>
+    //回调函数
+    function success(data) {
+        if (data.message === '0') {     //返回有效信息时给表单设置值
+            let name = document.getElementById("name");
+            name.value = data.data.name;
+
+            let face = document.getElementById("face");
+            face.src = data.data.face;
+
+            let sex = document.getElementById('sex');
+            sex.value = data.data.sex;
+
+            let birthday = document.getElementById('birthday');
+            birthday.value = data.data.birthday;
+
+            let school = document.getElementById('school');
+            school.value = data.data.school.name;
+        }
+    }
+
+    function call(data) {            //返回有效信息时给表单设置值
+        if (data.message === '0') {
+            let following = document.getElementById('following');
+            following.value = data.data.following;
+
+            let follower = document.getElementById('follower');
+            follower.value = data.data.follower;
+        }
+    }
+</script>
+
+<script id="0"></script>  <!--用于获取用户信息-->
+<script id="1"></script>  <!--用于获取关注数和粉丝数-->
+
+<script>
+    //开始查询
+    function query() {
+        //先将表单中的信息框置空
+        Array.from(document.getElementsByClassName('reset')).map(x => {
+            x.value = '';
+        })
+        document.querySelector('img').src = '';
+
+        //判断输入的uid是否合乎格式（纯数字）
+        let uid = document.getElementById('uid');
+        let reg = /^[0-9]*$/;
+        if (reg.test(uid.value)) {
+            //用户信息
+            if (document.getElementById('0') != null) {
+                getUserInfo('0');
+            }
+
+
+            //关注数 & 粉丝数
+            if (document.getElementById('1') != null) {
+                getUserInfo('1');
+            }
+        }
+    }
+
+
+    /**
+     * --------------通过jsonp解决跨域问题----------------------
+     * 问题：查询功能需要复用，但script的scr属性只会被解析一次
+     * 
+     * 解决方案：不停地创建和销毁同一个script标签
+     */
+    function getUserInfo(id) {
+        document.getElementById(id).remove();
+
+        let newScriptEle = document.createElement("script");
+        newScriptEle.id = id;
+
+        let uid = document.getElementById("uid").value;
+
+        if (id === '0') {
+            newScriptEle.setAttribute("src", "https://api.bilibili.com/x/space/acc/info?callback=success&mid=" + uid +
+                "&jsonp=jsonp");
+        } else {
+            newScriptEle.setAttribute("src", "https://api.bilibili.com/x/relation/stat?callback=call&vmid=" + uid +
+                "&jsonp=jsonp");
+        }
+
+        document.body.appendChild(newScriptEle);
+    }
+
+
+    
+    function keyup_submit(e) {
+        var evt = window.event || e;
+        if (evt.keyCode == 13) {
+            //回车事件
+            query();
+        }
+    }
+</script>
+
+</html>
