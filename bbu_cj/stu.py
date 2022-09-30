@@ -98,5 +98,5 @@ class BBU:
 if __name__ == '__main__':
     # username = input('请输入用户名:\n')
     # password = input('请输入密码:\n')
-    spider = BBU("51902121010", "zjf@6921", "./config.json")
+    spider = BBU("", "", "./config.json")
     spider.run()
